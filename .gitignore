@@ -1,0 +1,30 @@
+# Secrets: panel password hash and session signing key
+pipeline/acceso.json
+pipeline/secreto.key
+
+# Runtime state
+pipeline/estado.json
+pipeline/directo.pid
+pipeline/logs/
+
+# Video and generated clips (large, and footage belongs to the creators)
+pipeline/segmentos/
+pipeline/cola/
+pipeline/listos/
+pipeline/descartados/
+pipeline/proyectos/
+pipeline/vods/
+pipeline/work/
+*.mp4
+*.ts
+*.m4a
+*.part
+
+# Campaign briefs from the agencies (not ours to redistribute)
+*.pdf
+
+# Local tooling
+.claude/
+__pycache__/
+*.pyc
+*.tmp

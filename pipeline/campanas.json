@@ -1,0 +1,33 @@
+[
+  {
+    "key": "speed",
+    "name": "IShowSpeed × Expedia",
+    "creator": "IShowSpeed",
+    "hashtags": [
+      "#IShowSpeed",
+      "#Expedia"
+    ],
+    "template": "desenfocado",
+    "notes": "Solo el stream Unpack del 14/10. La maleta amarilla tiene que verse. Di bien el destino en la descripción. Sin X."
+  },
+  {
+    "key": "kaicenat",
+    "name": "Kai Cenat",
+    "creator": "Kai Cenat",
+    "hashtags": [
+      "#KaiCenat"
+    ],
+    "template": "viral",
+    "notes": "Solo streams del 21 al 31 de octubre. Sin X."
+  },
+  {
+    "key": "lacy",
+    "name": "Lacy",
+    "creator": "Lacy",
+    "hashtags": [
+      "#Lacy"
+    ],
+    "template": "viral",
+    "notes": "Cualquier contenido de Lacy. Mínimo 1M de vistas en total."
+  }
+]

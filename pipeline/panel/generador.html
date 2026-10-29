@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c0c0e">
+<link rel="manifest" href="/manifest.json">
+
+<title>Clip Generator</title>
+<style>
+:root{--bg:#0c0c0e;--panel:#16161a;--panel2:#1e1e24;--line:#2a2a32;--text:#eeeef0;--muted:#9a9aa6;--yel:#ffd700;--pink:#ff406e;--green:#2ecc71;--r:12px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,Segoe UI,sans-serif}
+header{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;font-weight:800;letter-spacing:.5px}
+header h1 span{color:var(--yel)}
+nav{display:flex;gap:4px}
+nav a{color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:8px}
+nav a.active{background:var(--panel2);color:var(--text);font-weight:600}
+.pill{padding:4px 10px;border-radius:99px;background:var(--panel2);font-size:13px;color:var(--muted)}
+.pill.on{color:#0c0c0e;background:var(--green);font-weight:600}
+.pill.warn{color:#0c0c0e;background:var(--yel);font-weight:600}
+.layout{display:grid;grid-template-columns:400px 1fr;gap:20px;padding:20px 24px}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.card h2{font-size:15px;margin:0 0 12px}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 10px;font:inherit}
+input[type=checkbox]{width:auto;margin-right:8px}
+textarea{resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1}
+button,.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer;white-space:nowrap;text-decoration:none;text-align:center}
+button:hover,.btn:hover{border-color:var(--muted)}
+button.primary{background:var(--yel);color:#111;border-color:var(--yel);font-weight:700}
+button.danger{color:var(--pink)}
+button:disabled{opacity:.4;cursor:default}
+pre.log{background:#09090b;border:1px solid var(--line);border-radius:8px;padding:10px;height:170px;overflow:auto;font:12px/1.45 Consolas,monospace;white-space:pre-wrap;margin:10px 0 0;color:#cfcfd6}
+.tpls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tpl{background:var(--panel2);border:2px solid transparent;border-radius:10px;padding:8px 6px;cursor:pointer;text-align:center;font-size:12px;color:var(--muted)}
+.tpl.sel{border-color:var(--yel);color:var(--text)}
+.phone{width:54px;height:96px;margin:0 auto 6px;border-radius:7px;background:#000;position:relative;overflow:hidden;border:1px solid #333}
+.phone .blk{position:absolute;left:0;right:0}
+.phone .hk{position:absolute;left:8px;right:8px;height:7px;border-radius:2px}
+.phone .sb{position:absolute;left:12px;right:12px;height:6px;border-radius:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.clip{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.clip video{width:100%;aspect-ratio:9/16;background:#000;display:block;max-height:500px;object-fit:contain}
+.clip .body{padding:12px;display:flex;flex-direction:column;gap:6px}
+.meta{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;align-items:center}
+.meta span{background:var(--panel2);padding:2px 8px;border-radius:99px;color:var(--muted)}
+.viral{font-weight:800;color:#111!important;font-size:13px}
+.rank{font-weight:800;color:var(--text)!important}
+.empty{color:var(--muted);padding:40px;text-align:center;border:1px dashed var(--line);border-radius:var(--r)}
+.hint{font-size:12px;color:var(--muted);margin:6px 0 0}
+.phead{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.phead select{max-width:480px}
+.status{font-size:14px;color:var(--muted)}
+details{font-size:13px;color:var(--muted)}
+summary{cursor:pointer}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:#111;padding:10px 16px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:1}
+@media(max-width:600px){
+  header{padding:10px 12px;gap:8px}header h1{font-size:16px}
+  .layout{padding:12px;gap:12px}.card{padding:14px}
+  .grid{grid-template-columns:1fr}.clip video{max-height:72vh}
+  button,.btn,input,select,textarea{font-size:16px;padding:10px 12px}
+  .tabs{flex-wrap:wrap}.tabs button{flex:1}
+  .phead select{max-width:100%}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>CHAOS <span>CLIPS</span></h1>
+  <nav><a href="/">Directo</a><a href="/generador" class="active">Generador</a></nav>
+  <span class="pill" id="pGen">Sin generar</span>
+  <span class="pill" id="pApi">Hooks: frases del vídeo</span>
+  <button id="logout" style="display:none;margin-left:auto" onclick="fetch('/api/logout',{method:'POST'}).then(()=>location.href='/login')">Salir</button>
+</header>
+
+<div class="layout">
+<aside>
+  <div class="card">
+    <h2>Nuevo vídeo</h2>
+    <label>Enlace de YouTube</label>
+    <input id="url" placeholder="https://www.youtube.com/watch?v=…">
+    <div class="row">
+      <div><label>Desde (opcional)</label><input id="desde" placeholder="0:00"></div>
+      <div><label>Hasta (opcional)</label><input id="hasta" placeholder="45:00"></div>
+    </div>
+    <div class="row">
+      <div><label>Nº de clips</label>
+        <select id="clips"><option>5</option><option selected>10</option><option>20</option><option>30</option><option>50</option></select></div>
+      <div><label>Idioma</label>
+        <select id="idioma"><option value="">Automático</option><option value="en">Inglés</option><option value="es">Español</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>Duración mín. (s)</label><input id="min" type="number" value="20"></div>
+      <div><label>Duración máx. (s)</label><input id="max" type="number" value="55"></div>
+    </div>
+    <label style="display:flex;align-items:center"><input type="checkbox" id="censura" checked>Censurar tacos en pantalla</label>
+    <label style="display:flex;align-items:center"><input type="checkbox" id="pitido" checked>Pitar los tacos en el audio</label>
+    <label style="display:flex;align-items:center"><input type="checkbox" id="cortes" checked>Quitar silencios (cortes rápidos)</label>
+
+    <label>Campaña</label>
+    <select id="campana" onchange="onCampaign()"></select>
+    <p class="hint" id="campNotes"></p>
+    <details style="margin-top:6px"><summary style="font-size:13px;color:var(--muted)">Gestionar campañas</summary>
+      <div id="campList"></div>
+      <div class="row" style="margin-top:8px"><button onclick="addCampaign()">+ Añadir campaña</button>
+        <button class="primary" onclick="saveCampaigns()">Guardar campañas</button></div>
+    </details>
+
+    <label>Plantilla</label>
+    <div class="tpls" id="tpls"></div>
+    <details style="margin-top:10px"><summary>Personalizar plantilla</summary>
+      <label>Diseño</label><select id="sLayout"></select>
+      <label>Subtítulos</label><select id="sSubs"></select>
+      <label>Hook</label><select id="sHook"></select>
+    </details>
+
+    <div class="row" style="margin-top:14px">
+      <button class="primary" onclick="generar()">Generar clips</button>
+      <button class="danger" style="flex:0" onclick="api('/api/generar/parar')">Parar</button>
+    </div>
+    <p class="hint">Descarga el vídeo, busca los mejores momentos y monta los clips en orden de viralidad. Un vídeo de 1 hora tarda unos 5–10 minutos.</p>
+    <pre class="log" id="log">—</pre>
+  </div>
+</aside>
+
+<main>
+  <div class="phead">
+    <select id="proj"></select>
+    <span class="status" id="pstatus"></span>
+  </div>
+  <div id="clips-grid" class="grid"></div>
+</main>
+</div>
+<div id="toast"></div>
+
+<script>
+const _fetch = window.fetch;
+window.fetch = async (...a) => { const r = await _fetch(...a); if(r.status === 401) location.href = '/login'; return r; };
+</script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let T = null, spec = 'fill:hormozi:amarillo', presetKey = 'viral', project = null, lastSig = '', current = [];
+
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
+async function api(url, body){
+  const r = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})});
+  const j = await r.json().catch(()=>({ok:false,error:'Error del servidor'}));
+  if(!j.ok && j.error) toast(j.error); return j;
+}
+
+const SUBCOL = {karaoke:'#ffd700', hormozi:'#2ecc71', pop:'#fff', caja:'#444', minimal:'#ccc'};
+const HOOKCOL = {caja_blanca:'#fff', caja_negra:'#333', amarillo:'#ffd700', ninguno:null};
+function phone(t){
+  const L = t.layout, blocks = {
+    fill:'<div class="blk" style="top:0;bottom:0;background:#3C3489"></div>',
+    A:'<div class="blk" style="top:0;bottom:0;background:#26215C"></div><div class="blk" style="top:12px;height:30px;background:#534AB7"></div><div class="blk" style="top:42px;bottom:0;background:#0F6E56"></div>',
+    B:'<div class="blk" style="top:0;bottom:0;background:#26215C"></div><div class="blk" style="top:33px;height:30px;background:#534AB7"></div>',
+    podcast:'<div class="blk" style="top:0;height:48px;background:#3C3489"></div><div class="blk" style="top:48px;bottom:0;background:#0F6E56"></div>',
+    auto:'<div class="blk" style="top:0;bottom:0;background:#26215C"></div><div class="blk" style="top:12px;height:30px;background:#534AB7"></div><div class="blk" style="top:42px;bottom:0;background:#0F6E56"></div>',
+  }[L] || '';
+  const hy = {fill:16,A:3,B:23,podcast:5,auto:3}[L], sy = {fill:66,A:63,B:70,podcast:45,auto:63}[L];
+  const hc = HOOKCOL[t.hook];
+  return `<div class="phone">${blocks}${hc?`<div class="hk" style="top:${hy}px;background:${hc}"></div>`:''}<div class="sb" style="top:${sy}px;background:${SUBCOL[t.subs]}"></div></div>`;
+}
+
+function renderTemplates(){
+  $('tpls').innerHTML = Object.entries(T.presets).filter(([k]) => k !== 'favorited').map(([k,t]) =>
+    `<div class="tpl ${k===presetKey?'sel':''}" onclick="pick('${k}')">${phone(t)}${esc(t.name)}</div>`).join('');
+}
+function pick(k){
+  presetKey = k; const t = T.presets[k]; spec = `${t.layout}:${t.subs}:${t.hook}`;
+  $('sLayout').value = t.layout; $('sSubs').value = t.subs; $('sHook').value = t.hook; renderTemplates();
+}
+function custom(){
+  spec = `${$('sLayout').value}:${$('sSubs').value}:${$('sHook').value}`;
+  const match = Object.entries(T.presets).find(([k,t]) => `${t.layout}:${t.subs}:${t.hook}` === spec);
+  presetKey = match ? match[0] : null; renderTemplates();
+}
+function tplName(s){ const m = Object.values(T.presets).find(t => `${t.layout}:${t.subs}:${t.hook}` === s); return m ? m.name : 'Personalizada'; }
+
+let CAMPS = [];
+const campName = k => (CAMPS.find(c => c.key === k) || {name: k}).name;
+async function loadCampaigns(){
+  CAMPS = await (await fetch('/api/campanas')).json();
+  const prev = $('campana').value;
+  $('campana').innerHTML = '<option value="">Sin campaña</option>' +
+    CAMPS.map(c => `<option value="${esc(c.key)}">${esc(c.name)} · ${esc(c.hashtags.join(' '))}</option>`).join('');
+  $('campana').value = CAMPS.some(c => c.key === prev) ? prev : '';
+  renderCampList(); onCampaign(true);
+}
+function onCampaign(keepTpl){
+  const c = CAMPS.find(x => x.key === $('campana').value);
+  $('campNotes').textContent = c ? `Añade «${c.creator}» y ${c.hashtags.join(' ')} a cada descripción. ${c.notes || ''}` : '';
+  if(c && !keepTpl && T.presets[c.template]) pick(c.template);
+}
+function renderCampList(){
+  const opts = sel => Object.entries(T.presets).filter(([k]) => k !== 'favorited')
+    .map(([k,t]) => `<option value="${k}" ${k===sel?'selected':''}>${esc(t.name)}</option>`).join('');
+  $('campList').innerHTML = CAMPS.map((c,i) => `<div class="card" style="padding:10px;margin:8px 0" data-i="${i}">
+    <div class="row"><input class="cName" value="${esc(c.name)}" placeholder="Nombre"><input class="cCreator" value="${esc(c.creator)}" placeholder="Creador"></div>
+    <div class="row" style="margin-top:6px"><input class="cTags" value="${esc(c.hashtags.join(' '))}" placeholder="#hashtags"><select class="cTpl">${opts(c.template)}</select></div>
+    <textarea class="cNotes" rows="2" style="margin-top:6px" placeholder="Notas / reglas">${esc(c.notes || '')}</textarea>
+    <button class="danger" style="margin-top:6px" onclick="CAMPS.splice(${i},1);renderCampList()">Quitar</button></div>`).join('');
+}
+function readCampList(){
+  CAMPS = [...document.querySelectorAll('#campList [data-i]')].map(d => ({...CAMPS[d.dataset.i],
+    name:d.querySelector('.cName').value, creator:d.querySelector('.cCreator').value,
+    hashtags:d.querySelector('.cTags').value, template:d.querySelector('.cTpl').value, notes:d.querySelector('.cNotes').value}));
+}
+function addCampaign(){ readCampList(); CAMPS.push({key:'', name:'', creator:'', hashtags:[], template:'viral', notes:''}); renderCampList(); }
+async function saveCampaigns(){
+  readCampList();
+  const j = await api('/api/campanas', CAMPS);
+  if(j.ok){ toast('Campañas guardadas'); loadCampaigns(); }
+}
+
+async function generar(){
+  const body = {url:$('url').value, desde:$('desde').value, hasta:$('hasta').value, clips:$('clips').value,
+    idioma:$('idioma').value, min:$('min').value, max:$('max').value, censura:$('censura').checked, plantilla:spec,
+    campana:$('campana').value, pitido:$('pitido').checked, cortes:$('cortes').checked};
+  const j = await api('/api/generar', body);
+  if(j.ok){ toast('Generando… los clips irán apareciendo a la derecha'); setTimeout(loadProjects, 4000); }
+}
+
+async function refreshStatus(){
+  const s = await (await fetch('/api/status')).json(), g = s.generador;
+  $('pGen').textContent = g.running ? 'Generando…' : 'Sin generar';
+  $('pGen').className = 'pill' + (g.running ? ' warn' : '');
+  $('pApi').textContent = s.api_key ? 'Hooks: Claude' : 'Hooks: frases del vídeo';
+  $('pApi').className = 'pill' + (s.api_key ? ' on' : '');
+  const el = $('log'), text = [g.log, s.tarea.running ? '\n' + s.tarea.label + '…' : ''].join('') || '—';
+  if(el.textContent !== text){ el.textContent = text; el.scrollTop = el.scrollHeight; }
+}
+
+async function loadProjects(){
+  const list = await (await fetch('/api/proyectos')).json();
+  const sel = $('proj'), prev = sel.value;
+  sel.innerHTML = list.length ? list.map(p => `<option value="${esc(p.id)}">${esc(p.title)} · ${p.n_made} clips</option>`).join('')
+                              : '<option value="">Aún no hay vídeos generados</option>';
+  if(list.length){ sel.value = list.some(p => p.id === prev) ? prev : list[0].id; }
+  project = sel.value || null; loadClips(true);
+}
+
+function card(c, i){
+  const v = c.viral, col = v >= 85 ? '#2ecc71' : v >= 65 ? '#ffd700' : '#ff9f43';
+  const opts = Object.entries(T.presets).map(([k,t]) => `<option value="${t.layout}:${t.subs}:${t.hook}" ${`${t.layout}:${t.subs}:${t.hook}`===c.template?'selected':''}>${esc(t.name)}</option>`).join('');
+  return `<div class="clip" data-id="${esc(c.id)}">
+    <video src="${c.video}#t=0.3" controls preload="metadata" playsinline></video>
+    <div class="body">
+      <div class="meta"><span class="rank">#${i+1}</span><span class="viral" style="background:${col}">viralidad ${v}</span><span>${c.duration}s</span><span>${esc(tplName(c.template))}</span>${c.campaign ? `<span style="color:var(--yel)">${esc(campName(c.campaign))}</span>` : ''}${c.swears ? `<span style="color:var(--pink)" title="Muchos tacos pueden provocar restricción de edad">⚠ ${c.swears} tacos</span>` : ''}</div>
+      <label>Hook (texto en pantalla)</label>
+      <textarea rows="2" class="hook">${esc(c.hook)}</textarea>
+      <label>Descripción</label>
+      <textarea rows="2" class="caption">${esc(c.caption)}</textarea>
+      <div class="row"><button onclick="save('${c.id}')">Guardar cambios</button>
+        <a class="btn primary" style="background:var(--yel);color:#111;font-weight:700" href="${c.video.split('?')[0]}?dl=1">Descargar</a></div>
+      <div class="row"><select class="tplsel">${opts}</select><button style="flex:0" onclick="applyTpl('${c.id}')">Aplicar</button></div>
+      <div class="row"><button onclick="copyText('${c.id}')">Copiar descripción</button><button onclick="act('${c.id}','carpeta')">Carpeta</button>
+        <button class="danger" onclick="act('${c.id}','descartar')">Descartar</button></div>
+      <details><summary>Transcripción</summary><p>${esc(c.transcript)}</p></details>
+    </div></div>`;
+}
+
+async function loadClips(force){
+  if(!project){ $('clips-grid').innerHTML = '<div class="empty">Pega un enlace de YouTube a la izquierda y pulsa "Generar clips".</div>'; $('pstatus').textContent=''; return; }
+  const p = await (await fetch('/api/proyecto/' + encodeURIComponent(project))).json();
+  $('pstatus').textContent = p.status;
+  const sig = JSON.stringify(p.clips.map(c => [c.id, c.video, c.hook, c.caption]));
+  const editing = document.activeElement && document.activeElement.closest && document.activeElement.closest('.clip');
+  const playing = [...document.querySelectorAll('video')].some(v => !v.paused);
+  if(!force && (sig === lastSig || editing || playing)) return;
+  lastSig = sig; current = p.clips;
+  $('clips-grid').innerHTML = p.clips.length ? p.clips.map(card).join('')
+    : `<div class="empty">${p.done ? 'No salió ningún clip.' : 'Trabajando… los clips aparecerán aquí en orden de viralidad.'}</div>`;
+}
+
+const el = id => document.querySelector(`.clip[data-id="${CSS.escape(id)}"]`);
+async function save(id){
+  const c = current.find(x => x.id === id), e = el(id);
+  const hook = e.querySelector('.hook').value, caption = e.querySelector('.caption').value;
+  const j = await api(`/api/proyecto/${encodeURIComponent(project)}/${id}/editar`, {hook, caption});
+  if(j.ok){ toast(hook.trim() !== c.hook ? 'Guardado. Volviendo a montar el clip…' : 'Guardado'); document.activeElement.blur(); waitTask(); }
+}
+async function applyTpl(id){
+  const j = await api(`/api/proyecto/${encodeURIComponent(project)}/${id}/plantilla`, {spec: el(id).querySelector('.tplsel').value});
+  if(j.ok){ toast('Cambiando plantilla… tarda unos segundos'); waitTask(); }
+}
+async function act(id, action){
+  const j = await api(`/api/proyecto/${encodeURIComponent(project)}/${id}/${action}`);
+  if(j.ok && action === 'descartar'){ toast('Descartado'); loadClips(true); }
+}
+async function copyText(id){
+  const c = current.find(x => x.id === id);
+  await navigator.clipboard.writeText(el(id).querySelector('.caption').value.trim() + '\n\n' + (c.hashtags || []).join(' '));
+  toast('Descripción copiada');
+}
+function waitTask(){
+  const t = setInterval(async () => {
+    const s = await (await fetch('/api/status')).json();
+    if(!s.tarea.running){ clearInterval(t); document.activeElement.blur(); loadClips(true); }
+  }, 1500);
+}
+
+(async () => {
+  T = await (await fetch('/api/plantillas')).json();
+  const fill = (id, obj) => $(id).innerHTML = Object.entries(obj).map(([k,v]) => `<option value="${k}">${esc(v)}</option>`).join('');
+  fill('sLayout', T.layouts); fill('sSubs', T.subs); fill('sHook', T.hooks);
+  ['sLayout','sSubs','sHook'].forEach(id => $(id).onchange = custom);
+  pick('viral');
+  await loadCampaigns();
+  $('proj').onchange = () => { project = $('proj').value; loadClips(true); };
+  await loadProjects(); refreshStatus();
+  fetch('/api/movil').then(r => r.json()).then(m => { $('logout').style.display = m.local ? 'none' : ''; });
+  setInterval(refreshStatus, 2000);
+  setInterval(() => loadClips(false), 4000);
+  setInterval(loadProjects, 30000);
+})();
+</script>
+</body>
+</html>
